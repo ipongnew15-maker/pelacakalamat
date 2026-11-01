@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080d12">
+<title>X-YANZX GPS TRACKER</title>
+<style>
+:root{color-scheme:dark;--bg:#080d12;--panel:#111c25;--line:#263946;--text:#eaf3f7;--muted:#91a5b2;--green:#3df0a2;--red:#ff687b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 85% 0%,#12372e 0,transparent 38%),var(--bg);color:var(--text);font:16px/1.6 system-ui,Arial,sans-serif}
+header{height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 max(18px,calc((100% - 760px)/2))}
+.brand{font-weight:900;letter-spacing:1px}.brand b,h1 span{color:var(--green)}.tag,.eyebrow{font-size:10px;letter-spacing:1.8px;color:var(--green);font-weight:800}.tag{border:1px solid #245343;border-radius:30px;padding:4px 9px}
+main{width:min(700px,calc(100% - 30px));margin:40px auto}.hero{margin-bottom:24px}.eyebrow{margin:0 0 8px}.hero h1{font-size:clamp(38px,8vw,60px);line-height:1.05;letter-spacing:-2px;margin:0 0 14px}.muted{color:var(--muted)}.panel{background:linear-gradient(145deg,#14212b,#0e171f);border:1px solid var(--line);border-radius:17px;padding:22px;margin:16px 0;box-shadow:0 18px 50px #0003}
+h2{margin:0 0 8px;font-size:22px}button,a.btn{border:0;border-radius:10px;padding:13px 17px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.primary{background:var(--green);color:#062016;width:100%;margin-top:12px}.secondary{background:#223541;color:var(--text)}.danger{background:#48202a;color:#ffb7c0;width:100%;margin-top:10px}.whatsapp{background:#123c2d;color:#9affcb;width:100%;margin-top:10px}
+input{width:100%;background:#080f15;border:1px solid var(--line);border-radius:9px;padding:12px;color:var(--text)}label{display:block;color:var(--muted);font-size:13px;margin:15px 0 6px}.row{display:flex;gap:8px}.row input{min-width:0}.notice{background:#2a2416;border:1px solid #6c582c;color:#f1dba0;padding:12px;border-radius:10px;font-size:13px;margin:16px 0}
+.status{font-size:13px;color:var(--muted);margin-top:12px}.hidden{display:none!important}.coords{font-family:ui-monospace,monospace;font-size:13px;overflow-wrap:anywhere}.maplink{display:block;color:var(--green);margin-top:12px}footer{text-align:center;color:#647986;font-size:11px;margin:35px 0}
+@media(max-width:480px){header{padding:0 14px}.tag{font-size:8px}main{margin:28px auto}.panel{padding:18px}.row{flex-direction:column}}
+</style>
+</head>
+<body>
+<header><div class="brand">● X-YANZX <b>GPS TRACKER</b></div><span class="tag">HTML EDITION</span></header>
+<main>
+<section class="hero"><p class="eyebrow">CONSENT-BASED LOCATION SHARING</p><h1>Share location.<br><span>Stay connected.</span></h1><p class="muted">Berbagi lokasi secara sukarela. Pemilik perangkat harus menyetujui permintaan dan izin GPS browser.</p></section>
+
+<section class="panel" id="home">
+<p class="eyebrow">CONTROL CENTER</p><h2>Buat undangan lokasi</h2>
+<p class="muted">Buat pesan undangan untuk dikirim melalui WhatsApp. Penerima dapat membuka halaman ini, lalu memilih sendiri apakah ingin membagikan lokasinya.</p>
+<label for="invite">Pesan undangan</label>
+<input id="invite" value="Hai, jika berkenan, silakan buka halaman ini dan pilih setuju untuk membagikan lokasi secara sukarela.">
+<button class="primary" id="shareInvite">Bagikan undangan via WhatsApp</button>
+<p class="status">Catatan: versi satu file HTML ini tidak mengirim koordinat ke perangkat pembuat link.</p>
+</section>
+
+<section class="panel">
+<p class="eyebrow">GPS CONSENT</p><h2>Bagikan lokasi perangkat ini</h2>
+<div class="notice">Dengan menekan tombol setuju, browser akan meminta izin GPS. Koordinat akan ditampilkan di perangkat ini dan dapat dibuka di Google Maps. Tidak ada koordinat yang dikirim ke server.</div>
+<button class="primary" id="allow">Saya setuju, tampilkan lokasi saya</button>
+<div id="result" class="hidden">
+<p class="status" id="status">Meminta lokasi…</p>
+<p class="coords" id="coords"></p>
+<a id="map" class="maplink" target="_blank" rel="noopener">Buka lokasi di Google Maps ↗</a>
+<button class="danger" id="stop">Hentikan / hapus tampilan lokasi</button>
+</div>
+</section>
+
+<section class="panel">
+<h2>Privasi</h2>
+<ul class="muted"><li>Tidak bisa melacak orang hanya dengan nomor WhatsApp.</li><li>Lokasi hanya diakses setelah persetujuan dan izin GPS.</li><li>Gunakan HTTPS saat dihosting; geolocation browser memerlukan HTTPS atau localhost.</li><li>Jangan membagikan lokasi orang lain tanpa persetujuannya.</li></ul>
+</section>
+<footer>X-YANZX GPS TRACKER · HTML SINGLE FILE</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+$("shareInvite").addEventListener("click",()=>{
+  const url=location.href;
+  if(!url.startsWith("http")){alert("Upload file HTML ini ke hosting HTTPS terlebih dahulu agar bisa dibagikan.");return;}
+  const message=$("invite").value+" "+url;
+  window.open("https://wa.me/?text="+encodeURIComponent(message),"_blank","noopener");
+});
+let watch=null;
+$("allow").addEventListener("click",()=>{
+  if(!navigator.geolocation){$("status").textContent="Browser tidak mendukung GPS."; $("result").classList.remove("hidden");return;}
+  $("result").classList.remove("hidden");$("status").textContent="Meminta izin lokasi dari browser…";
+  watch=navigator.geolocation.watchPosition(pos=>{
+    const lat=pos.coords.latitude,lon=pos.coords.longitude,acc=Math.round(pos.coords.accuracy);
+    $("coords").textContent=`Latitude: ${lat}\nLongitude: ${lon}\nAkurasi: ±${acc} meter`;
+    $("map").href=`https://www.google.com/maps?q=${lat},${lon}`;
+    $("status").textContent="Lokasi berhasil didapatkan pada perangkat ini.";
+  },err=>{
+    $("status").textContent="Lokasi gagal diakses: "+err.message;
+  },{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
+});
+$("stop").addEventListener("click",()=>{
+  if(watch!==null)navigator.geolocation.clearWatch(watch);
+  watch=null;$("coords").textContent="";$("map").removeAttribute("href");
+  $("status").textContent="Akses lokasi dihentikan. Tampilan koordinat dihapus.";
+});
+</script>
+</body>
+</html>
